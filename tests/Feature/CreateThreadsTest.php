@@ -22,32 +22,24 @@ class CreateThreadsTest extends TestCase
 
         // $thread = factory('App\Thread')->raw(); //returns an array
 
-        $thread = make('App\Thread'); //returns an instance
+        $thread = create('App\Thread'); //returns an instance
 
-        $response = $this->post('/threads', $thread->toArray());
+        $this->post('/threads', $thread->toArray());
 
         //Then, when we visit the thread page, We should see the new Thread
-        // $this->get($response->getTargetUrl())
-        //     ->asertSee($thread->body);
-        // ->asertSee($thread->body);
+        $this->get($thread->path())
+            ->assertSee($thread->title)
+            ->assertSee($thread->body);
     }
     /** @test */
     function guest_may_not_create_threads()
     {
-        $this->withoutExceptionHandling();
-
-        $this->expectException('Illuminate\Auth\AuthenticationException');
-
-        // $thread = factory('App\Thread')->make();
-        $thread = make('App\Thread');
-
-        $this->post('/threads', $thread->toArray());
-    }
-
-    /** @test */
-    function guests_cannot_see_the_create_thread_page()
-    {
+        //When visiting the page, guest may be redirected
         $this->get('/threads/create')
+            ->assertRedirect('/login');
+
+        //When hitting the endpoint, guest may be redirected
+        $this->post('/threads')
             ->assertRedirect('/login');
     }
 }

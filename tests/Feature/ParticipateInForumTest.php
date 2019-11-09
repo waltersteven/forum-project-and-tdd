@@ -14,9 +14,12 @@ class ParticipateInForumTest extends TestCase
     /** @test */
     function unauthenticated_users_may_not_add_replies()
     {
-        $this->expectException('Illuminate\Auth\AuthenticationException');
+        // $this->withoutExceptionHandling();
 
-        $this->post('/threads/1/replies', []);
+        // $this->expectException('Illuminate\Auth\AuthenticationException');
+
+        $this->post('/threads/slug/1/replies', [])
+            ->assertRedirect('/login');
     }
 
     /** @test */
@@ -27,11 +30,10 @@ class ParticipateInForumTest extends TestCase
         $thread = factory('App\Thread')->create();
 
         $reply = factory('App\Reply')->make();
+
         $this->post($thread->path() . '/replies', $reply->toArray());
 
-        $getresponse = $this->get($thread->path());
-        dd($getresponse);
-        // $this->get($thread->path())
-        //     ->assertSee($reply->body);
+        $this->get($thread->path())
+            ->assertSee($reply->body);
     }
 }

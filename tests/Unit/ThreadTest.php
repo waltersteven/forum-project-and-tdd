@@ -18,17 +18,17 @@ class ThreadTest extends TestCase
     }
 
     /** @test */
-    public function a_thread_has_replies()
-    {
-
-        $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $this->thread->replies);
-    }
-
-    /** @test */
     public function a_thread_has_a_creator()
     {
 
         $this->assertInstanceOf('App\User', $this->thread->creator);
+    }
+
+    /** @test */
+    public function a_thread_has_replies()
+    {
+
+        $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $this->thread->replies);
     }
 
     /** @test */
@@ -40,5 +40,16 @@ class ThreadTest extends TestCase
         ]);
 
         $this->assertCount(1, $this->thread->replies);
+    }
+    /** @test */
+    public function a_thread_belongs_to_a_channel()
+    {
+        $this->assertInstanceOf('App\Channel', $this->thread->channel);
+    }
+
+    /** @test */
+    public function a_thread_can_make_a_string_path()
+    {
+        $this->assertEquals("/threads/{$this->thread->channel->slug}/{$this->thread->id}", $this->thread->path());
     }
 }

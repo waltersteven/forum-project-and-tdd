@@ -12,7 +12,7 @@ class CreateThreadsTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    function guest_may_not_create_threads()
+    function guests_may_not_create_threads()
     {
         //When visiting the page, guest may be redirected
         $this->get('/threads/create')

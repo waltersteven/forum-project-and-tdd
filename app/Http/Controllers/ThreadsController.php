@@ -23,6 +23,10 @@ class ThreadsController extends Controller
     {
         $threads = $this->getThreads($channel, $filters);
 
+        if (request()->wantsJson()) {
+            return $threads;
+        }
+
         return view('threads.index', compact('threads'));
     }
 
@@ -68,7 +72,10 @@ class ThreadsController extends Controller
      */
     public function show($channelId, Thread $thread)
     {
-        return view('threads.show', compact('thread'));
+        return view('threads.show', [
+            'thread' => $thread,
+            'replies' => $thread->replies()->paginate(20)
+        ]);
     }
 
     /**
@@ -107,6 +114,12 @@ class ThreadsController extends Controller
 
     protected function getThreads(Channel $channel, ThreadFilters $filters)
     {
+        // $threads = Thread::filter($filters)->latest(); //another option
+
+        //Eager loading: with() retrieves Threads including channel property.
+        // $threads = Thread::with('channel')->latest()->filter($filters);
+
+        //Using with attribute in Model
         $threads = Thread::latest()->filter($filters);
 
         if ($channel->exists) {

@@ -1,4 +1,4 @@
-<div class="card mt-4">
+<div id="reply-{{ $reply->id }}" class="card mt-4">
     <div class="card-header">
     	<div class="level">
 			<h5 class="flex">
@@ -20,5 +20,16 @@
     </div>
     <div class="card-body">
       {{ $reply->body }}
-    </div>
+	</div>
+	
+	@can('update', $reply)
+		<div class="card-footer">
+			<form action="/replies/{{$reply->id}}" method="post">
+				@csrf
+				@method('delete')
+				
+				<button type="submit" class="btn btn-danger btn-xs">Delete</button>
+			</form>
+		</div>
+	@endcan
 </div>

@@ -8,6 +8,13 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+Vue.prototype.authorize = function (handler) {
+    //Additional admin privileges
+    let user = window.App.user;
+
+    return user ? handler(user) : false;
+}
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -26,8 +33,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 library.add(faUserSecret, faHeart)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
 Vue.component('flash', require('./components/Flash.vue').default);
-Vue.component('reply', require('./components/Reply.vue').default);
+
+Vue.component('thread-view', require('./pages/Thread.vue').default);
+
+// Vue.component('reply', require('./components/Reply.vue').default);
 // Vue.component('favorite', require('./components/Favorite.vue').default);
 
 /**

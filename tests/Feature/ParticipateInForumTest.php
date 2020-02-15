@@ -12,7 +12,7 @@ class ParticipateInForumTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    function unauthenticated_users_may_not_add_replies()
+    public function unauthenticated_users_may_not_add_replies()
     {
         // $this->withoutExceptionHandling();
 
@@ -23,22 +23,23 @@ class ParticipateInForumTest extends TestCase
     }
 
     /** @test */
-    function an_authenticated_user_may_participate_in_forum_threads()
+    public function an_authenticated_user_may_participate_in_forum_threads()
     {
-        $this->be($user = factory('App\User')->create());
+        $this->signIn();
 
-        $thread = factory('App\Thread')->create();
+        $thread = create('App\Thread');
 
-        $reply = factory('App\Reply')->make();
+        $reply = make('App\Reply');
 
         $this->post($thread->path() . '/replies', $reply->toArray());
 
-        $this->get($thread->path())
-            ->assertSee($reply->body);
+        $this->assertDatabaseHas('replies', ['body' => $reply->body]);
+
+        $this->assertEquals(1, $thread->fresh()->replies_count);
     }
 
     /** @test */
-    function a_reply_requires_a_body()
+    public function a_reply_requires_a_body()
     {
         $this->signIn();
 
@@ -50,7 +51,7 @@ class ParticipateInForumTest extends TestCase
     }
 
     /** @test */
-    function unauthorized_users_cannot_delete_replies()
+    public function unauthorized_users_cannot_delete_replies()
     {
         // $this->withoutExceptionHandling();
 
@@ -65,7 +66,7 @@ class ParticipateInForumTest extends TestCase
     }
 
     /** @test */
-    function authorized_users_can_delete_replies()
+    public function authorized_users_can_delete_replies()
     {
         $this->signIn();
 
@@ -74,10 +75,12 @@ class ParticipateInForumTest extends TestCase
         $this->delete("/replies/{$reply->id}")->assertStatus(302);
 
         $this->assertDatabaseMissing('replies', ['id' => $reply->id]);
+
+        $this->assertEquals(0, $reply->thread->fresh()->replies_count);
     }
 
     /** @test */
-    function unauthorized_users_cannot_update_replies()
+    public function unauthorized_users_cannot_update_replies()
     {
         // $this->withoutExceptionHandling();
 
@@ -92,15 +95,15 @@ class ParticipateInForumTest extends TestCase
     }
 
     /** @test */
-    function authorized_users_can_update_replies()
+    public function authorized_users_can_update_replies()
     {
         $this->withoutExceptionHandling();
         $this->signIn();
 
         $reply = create('App\Reply', ['user_id' => auth()->id()]);
 
-        $updatedReply = "You been changed, fool.";
-        $this->patch("/replies/{$reply->id}", ["body" => $updatedReply]);
+        $updatedReply = 'You been changed, fool.';
+        $this->patch("/replies/{$reply->id}", ['body' => $updatedReply]);
 
         $this->assertDatabaseHas('replies', ['id' => $reply->id, 'body' => $updatedReply]);
     }

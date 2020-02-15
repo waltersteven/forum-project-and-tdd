@@ -16,9 +16,11 @@ class Thread extends Model
     {
         parent::boot();
 
-        static::addGlobalScope('replyCount', function ($builder) {
-            $builder->withCount('replies');
-        });
+        //This has been replaced by a new the reply_count column in table
+
+        // static::addGlobalScope('replyCount', function ($builder) {
+        //     $builder->withCount('replies');
+        // });
 
         static::deleting(function ($thread) {
             // $thread->replies->each(function ($reply) {
@@ -53,7 +55,7 @@ class Thread extends Model
 
     /**
      * Add a Reply to a Thread
-     * 
+     *
      * @param Array $reply
      * @return Reply
      */

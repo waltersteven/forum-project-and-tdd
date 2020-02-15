@@ -14,6 +14,7 @@ class ThreadsController extends Controller
     {
         $this->middleware('auth')->except(['index', 'show']);
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -43,7 +44,6 @@ class ThreadsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -51,14 +51,14 @@ class ThreadsController extends Controller
         $this->validate($request, [
             'title' => 'required',
             'body' => 'required',
-            'channel_id' => 'required|exists:channels,id'
+            'channel_id' => 'required|exists:channels,id',
         ]);
 
         $thread = Thread::create([
             'user_id' => auth()->id(),
             'channel_id' => request('channel_id'),
             'title' => request('title'),
-            'body' => request('body')
+            'body' => request('body'),
         ]);
 
         return redirect($thread->path())->with('flash', 'Your thread has been published!');
@@ -67,44 +67,38 @@ class ThreadsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Thread  $thread
+     * @param mixed $channel
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($channel, Thread $thread)
     {
-        return view('threads.show', [
-            'thread' => $thread,
-            'replies' => $thread->replies()->paginate(20)
-        ]);
+        return view('threads.show', compact('thread'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Thread  $thread
      * @return \Illuminate\Http\Response
      */
     public function edit(Thread $thread)
     {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Thread  $thread
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Thread $thread)
     {
-        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Thread  $thread
+     * @param mixed $channel
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($channel, Thread $thread)

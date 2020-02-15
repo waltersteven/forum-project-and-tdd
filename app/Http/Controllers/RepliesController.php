@@ -8,21 +8,25 @@ use Illuminate\Http\Request;
 
 class RepliesController extends Controller
 {
-
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth', ['except' => 'index']);
+    }
+
+    public function index($channelId, Thread $thread)
+    {
+        return $thread->replies()->paginate(3);
     }
 
     public function store($channelId, Thread $thread)
     {
         $this->validate(request(), [
-            'body' => 'required'
+            'body' => 'required',
         ]);
 
         $reply = $thread->addReply([
             'body' => request('body'),
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
         ]);
 
         if (request()->expectsJson()) {

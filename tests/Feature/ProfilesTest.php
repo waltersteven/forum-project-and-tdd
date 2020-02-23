@@ -12,7 +12,7 @@ class ProfilesTest extends TestCase
     /** @test */
     public function a_user_has_a_profile()
     {
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
 
         $user = create('App\User');
 
@@ -31,7 +31,7 @@ class ProfilesTest extends TestCase
 
         $thread = create('App\Thread', ['user_id' => auth()->id()]);
 
-        $this->get("/profiles/" . auth()->user()->name)
+        $this->get('/profiles/' . auth()->user()->name)
             ->assertSee($thread->title)
             ->assertSee($thread->body);
     }

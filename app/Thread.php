@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Notifications\ThreadWasUpdated;
 use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
@@ -63,7 +64,25 @@ class Thread extends Model
      */
     public function addReply($reply)
     {
-        return $this->replies()->create($reply);
+        $reply = $this->replies()->create($reply);
+
+        // 1st approach
+
+        // foreach ($this->subscriptions as $subscription) {
+        //     if ($subscription->user_id != $reply->user_id) {
+        //         $subscription->user->notify(new ThreadWasUpdated($this, $reply));
+        //     }
+        // }
+
+        // 2nd approach
+
+        $this->subscriptions
+            ->filter(function ($sub) use ($reply) {
+                return $sub->user_id != $reply->user_id;
+            })
+            ->each->notify($reply);
+
+        return $reply;
     }
 
     public function scopeFilter($query, $filters)
@@ -76,6 +95,9 @@ class Thread extends Model
         $this->subscriptions()->create([
             'user_id' => $userId ?: auth()->id()
         ]);
+
+        //In order to use the instance after calling susbcribe method (e.g.: NotificationsTest).
+        return $this;
     }
 
     public function unsubscribe($userId = null)

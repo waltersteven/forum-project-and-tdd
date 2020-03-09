@@ -27,16 +27,18 @@ Vue.prototype.authorize = function (handler) {
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUserSecret, faHeart } from '@fortawesome/free-solid-svg-icons'
+import { faUserSecret, faHeart, faBell } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faUserSecret, faHeart)
+library.add(faUserSecret, faHeart, faBell)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.component('flash', require('./components/Flash.vue').default);
 
 Vue.component('paginator', require('./components/Paginator.vue').default);
+
+Vue.component('user-notifications', require('./components/UserNotifications.vue').default);
 
 Vue.component('thread-view', require('./pages/Thread.vue').default);
 

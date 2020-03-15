@@ -75,14 +75,17 @@ class Thread extends Model
         // }
 
         // 2nd approach
-
-        $this->subscriptions
-            ->filter(function ($sub) use ($reply) {
-                return $sub->user_id != $reply->user_id;
-            })
-            ->each->notify($reply);
+        $this->notifySubscribers($reply);
 
         return $reply;
+    }
+
+    public function notifySubscribers($reply)
+    {
+        $this->subscriptions
+            ->where('user_id', '!=', $reply->user_id)
+            ->each
+            ->notify($reply);
     }
 
     public function scopeFilter($query, $filters)
@@ -117,5 +120,18 @@ class Thread extends Model
         return $this->subscriptions()
                 ->where('user_id', auth()->id())
                 ->exists();
+    }
+
+    /**
+     * hasUpdatesFor
+     *
+     * @param User $user
+     * @return boolean
+     */
+    public function hasUpdatesFor($user)
+    {
+        $key = $user->visitedThreadCacheKey($this);
+
+        return $this->updated_at > cache($key);
     }
 }

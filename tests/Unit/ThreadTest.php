@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Notifications\ThreadWasUpdated;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ThreadTest extends TestCase
@@ -38,6 +40,22 @@ class ThreadTest extends TestCase
         ]);
 
         $this->assertCount(1, $this->thread->replies);
+    }
+
+    /** @test */
+    public function a_thread_notifies_all_registered_subscribers_when_a_reply_is_added()
+    {
+        Notification::fake();
+
+        $this->signIn()
+        ->thread
+        ->subscribe()
+        ->addReply([
+            'body' => 'Foobar',
+            'user_id' => 999
+        ]);
+
+        Notification::assertSentTo(auth()->user(), ThreadWasUpdated::class);
     }
 
     /** @test */
@@ -83,5 +101,22 @@ class ThreadTest extends TestCase
         $thread->unsubscribe($userId);
 
         $this->assertCount(0, $thread->subscriptions);
+    }
+
+    /** @test */
+    public function a_thread_can_check_if_the_authenticated_user_has_read_all_replies()
+    {
+        $this->signIn();
+
+        $thread = create('App\Thread');
+
+        tap(auth()->user(), function ($user) use ($thread) {
+            $this->assertTrue($thread->hasUpdatesFor($user));
+
+            // Record that the user visited this page.
+            $user->read($thread);
+
+            $this->assertFalse($thread->hasUpdatesFor(auth()->user()));
+        });
     }
 }

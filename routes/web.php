@@ -11,8 +11,18 @@
 |
 */
 
+use App\Jobs\SendEmail;
+
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/queue', function () {
+    $user = App\User::first();
+
+    SendEmail::dispatch($user);
+
+    return 'Email was queued';
 });
 
 Auth::routes();

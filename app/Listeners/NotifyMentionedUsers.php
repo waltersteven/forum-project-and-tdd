@@ -26,13 +26,19 @@ class NotifyMentionedUsers
         // }
 
         // 2nd approach
-        collect($event->reply->mentionedUsers())
-            ->map(function ($name) {
-                return User::where('name', $name)->first();
-            })
-            ->filter() // removes null values
-            ->each(function ($user) use ($event) {
-                $user->notify(new YouWereMentioned($event->reply));
-            });
+        // collect($event->reply->mentionedUsers())
+        //     ->map(function ($name) {
+        //         return User::where('name', $name)->first();
+        //     })
+        //     ->filter() // removes null values
+        //     ->each(function ($user) use ($event) {
+        //         $user->notify(new YouWereMentioned($event->reply));
+        //     });
+
+        // 3rd approach
+        User::whereIn('name', $event->reply->mentionedUsers())
+            ->get()
+            ->each
+            ->notify(new YouWereMentioned($event->reply));
     }
 }

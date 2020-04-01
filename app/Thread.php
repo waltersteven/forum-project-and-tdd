@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Notifications\ThreadWasUpdated;
+use App\Events\ThreadReceivedNewReply;
 use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
@@ -66,6 +66,8 @@ class Thread extends Model
     {
         $reply = $this->replies()->create($reply);
 
+        event(new ThreadReceivedNewReply($reply));
+
         // 1st approach
 
         // foreach ($this->subscriptions as $subscription) {
@@ -75,18 +77,18 @@ class Thread extends Model
         // }
 
         // 2nd approach
-        $this->notifySubscribers($reply);
+        // $this->notifySubscribers($reply); // moved to Listener
 
         return $reply;
     }
 
-    public function notifySubscribers($reply)
-    {
-        $this->subscriptions
-            ->where('user_id', '!=', $reply->user_id)
-            ->each
-            ->notify($reply);
-    }
+    // public function notifySubscribers($reply)
+    // {
+    //     $this->subscriptions
+    //         ->where('user_id', '!=', $reply->user_id)
+    //         ->each
+    //         ->notify($reply);
+    // }
 
     public function scopeFilter($query, $filters)
     {

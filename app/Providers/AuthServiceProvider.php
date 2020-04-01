@@ -28,7 +28,7 @@ class AuthServiceProvider extends ServiceProvider
 
         //Admin rules
         Gate::before(function ($user) {
-            if ($user->name == 'Walter') return true;
+            // if ($user->name == 'Walter') return true;
         });
     }
 }

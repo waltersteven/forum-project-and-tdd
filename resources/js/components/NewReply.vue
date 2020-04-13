@@ -25,6 +25,33 @@
 </template>
 
 <script>
+import Tribute from "tributejs";
+
+function fetchUsers(text, cb) {
+	console.log("called fetchusers");
+	axios
+		.get("/api/users", {
+			params: {
+				name: text
+			}
+		})
+		.then(response => {
+			console.log("response :", response);
+
+			var values = [];
+
+			response.data.forEach(element => {
+				let userObj = { value: element };
+				values.push(userObj);
+			});
+
+			cb(values);
+		})
+		.catch(error => {
+			console.log("error :", error);
+			cb([]);
+		});
+}
 export default {
 	data() {
 		return {
@@ -53,6 +80,22 @@ export default {
 					flash(error.response.data, "danger");
 				});
 		}
+	},
+
+	mounted() {
+		var tribute = new Tribute({
+			collection: [
+				{
+					values: function(text, cb) {
+						fetchUsers(text, users => cb(users));
+					},
+
+					lookup: "value"
+				}
+			]
+		});
+
+		tribute.attach(document.getElementById("body"));
 	}
 };
 </script>

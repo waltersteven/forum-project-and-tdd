@@ -13,19 +13,32 @@ class CreateThreadsTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    function guests_may_not_create_threads()
+    public function guests_may_not_create_threads()
     {
         //When visiting the page, guest may be redirected
         $this->get('/threads/create')
-            ->assertRedirect('/login');
+            ->assertRedirect(route('login'));
 
         //When hitting the endpoint, guest may be redirected
-        $this->post('/threads')
-            ->assertRedirect('/login');
+        $this->post(route('threads'))
+            ->assertRedirect(route('login'));
+    }
+
+    /** @test */
+    public function new_users_must_first_confirm_their_email_address_before_creating_threads()
+    {
+        $user = factory('App\User')->states('unconfirmed')->create();
+
+        $this->signIn($user);
+
+        $thread = make('App\Thread');
+
+        $this->post(route('threads'), $thread->toArray())
+            ->assertRedirect('/email/verify');
     }
 
     /** @test  */
-    function an_authenticated_user_can_create_new_forum_threads()
+    public function a_user_can_create_new_forum_threads()
     {
         $this->withoutExceptionHandling();
         //Given we have a signed in user
@@ -37,7 +50,7 @@ class CreateThreadsTest extends TestCase
 
         $thread = make('App\Thread'); //returns an array
 
-        $response = $this->post('/threads', $thread->toArray());
+        $response = $this->post(route('threads'), $thread->toArray());
 
         //Then, when we visit the thread page, We should see the new Thread
         $this->get($response->headers->get('Location'))
@@ -46,21 +59,21 @@ class CreateThreadsTest extends TestCase
     }
 
     /** @test */
-    function a_thread_requires_a_title()
+    public function a_thread_requires_a_title()
     {
         $this->publishThread(['title' => null])
             ->assertSessionHasErrors('title');
     }
 
     /** @test */
-    function a_thread_requires_a_body()
+    public function a_thread_requires_a_body()
     {
         $this->publishThread(['body' => null])
             ->assertSessionHasErrors('body');
     }
 
     /** @test */
-    function a_thread_requires_a_valid_channel()
+    public function a_thread_requires_a_valid_channel()
     {
         $this->publishThread(['channel_id' => null])
             ->assertSessionHasErrors('channel_id');
@@ -70,7 +83,7 @@ class CreateThreadsTest extends TestCase
     }
 
     /** @test */
-    function unauthorized_users_may_not_delete_threads()
+    public function unauthorized_users_may_not_delete_threads()
     {
         $thread = create('App\Thread');
 
@@ -81,8 +94,9 @@ class CreateThreadsTest extends TestCase
         $this->signIn();
         $this->delete($thread->path())->assertStatus(403);
     }
+
     /** @test */
-    function authorized_users_can_delete_threads()
+    public function authorized_users_can_delete_threads()
     {
         $this->signIn();
 
@@ -114,12 +128,12 @@ class CreateThreadsTest extends TestCase
         $this->assertEquals(0, Activity::count());
     }
 
-    protected function publishThread($overrides)
+    protected function publishThread($overrides = [])
     {
         $this->signIn();
 
         $thread = make('App\Thread', $overrides);
 
-        return $this->post('/threads', $thread->toArray());
+        return $this->post(route('threads'), $thread->toArray());
     }
 }

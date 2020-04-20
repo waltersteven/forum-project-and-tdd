@@ -26,6 +26,12 @@ $factory->define(App\User::class, function (Faker $faker) {
     ];
 });
 
+$factory->state(App\User::class, 'unconfirmed', function () {
+    return [
+        'email_verified_at' => null
+    ];
+});
+
 $factory->define(App\Thread::class, function (Faker $faker) {
     return [
         'user_id' => function () {
